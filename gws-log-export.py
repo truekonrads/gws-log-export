@@ -11,9 +11,10 @@ from pathlib import Path
 import ujson
 import sys
 import textwrap
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import signal
-from threading import Event
+# from concurrent.futures import ThreadPoolExecutor, as_completed
+# import signal
+# from threading import Event
+from smart_open import open
 def create_parser():
     """
     Function to create an argument parser for the Google Admin SDK reports_v1 API.
@@ -60,6 +61,11 @@ def create_parser():
         "--all-applications",
         action="store_true",
         help="Flag to select all applications from a list of all known reports_v1 applications",
+    )
+    parser.add_argument(
+        "--compress",
+        action="store_true",
+        help="Compress outputs as gz",
     )
     parser.add_argument(
         "--show-all-applications",
@@ -212,7 +218,8 @@ def fetch_logs(service,app:str,start_time:datetime,end_time:datetime,user_key,ev
             return None
         activities_doc = request.execute()
         items=activities_doc.get('items', [])
-        logger.debug(f"Retrieved {len(items)} items, item timestamps are {items[-1]['id']['time']}-{items[0]['id']['time']}")
+        if len(items):
+            logger.debug(f"Retrieved {len(items)} items, item timestamps are {items[-1]['id']['time']}-{items[0]['id']['time']}")
         for i in items:
             yield i
         request = activities.list_next(request, activities_doc)
@@ -256,12 +263,18 @@ def main():
     service = build('admin', 'reports_v1', credentials=credentials)
     # start_date=
     for a in apps:
+        logger.info(f"Starting to retrieve app {a} for user {args.user}")
         # start=args.start_date
         # end=args.end_date
-        futures=[]
         for start,end in get_intervals(args.start_date,args.end_date,args.interval):
-            dest=Path(args.output_directory) / f"{args.user}-{a}-{start.isoformat().replace(':','')}-{end.isoformat().replace(':','')}.json"
+            fn=f"{args.user}-{a}-{start.isoformat().replace(':','')}-{end.isoformat().replace(':','')}"
+            if args.compress:
+                fn+=".gz"
+            dest=Path(args.output_directory) / fn
+            # if args.compress:
+                # dest=dest / ".gz"
             do_work(service,a,start,end,args.user,dest)
+        logger.info(f"Done retrieving app {a} for user {args.user}")
 
 
 
