@@ -3,6 +3,35 @@ Google Workspace Log Export tool.
 
 This tool retrieves Google Workspace log files and saves them as json.
 
+```
+usage: gws-log-export.py [-h] --credential-file CREDENTIAL_FILE --credential-subject CREDENTIAL_SUBJECT --start-date START_DATE
+                         [--end-date END_DATE] [--applications APPLICATIONS [APPLICATIONS ...]] [--all-applications] [--compress]
+                         [--show-all-applications] [--debug] [--output-directory OUTPUT_DIRECTORY] [--interval INTERVAL] [--user USER]
+
+Google Admin SDK reports_v1 API arguments parser
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --credential-file CREDENTIAL_FILE
+                        Path to the JSON file with Google service account credentials
+  --credential-subject CREDENTIAL_SUBJECT
+                        E-mail of an account to act as to retrieve logs
+  --start-date START_DATE
+                        Date from which to retrieve the logs, must be formatted as ISO8601 datetime
+  --end-date END_DATE   End date for logs retrieval, defaults to current date and time if not provided
+  --applications APPLICATIONS [APPLICATIONS ...]
+                        List of applications for which to retrieve log files
+  --all-applications    Flag to select all applications from a list of all known reports_v1 applications
+  --compress            Compress outputs as gz
+  --show-all-applications
+                        Only display all valid application choices
+  --debug               Flag to set logging level to debug in the loguru module
+  --output-directory OUTPUT_DIRECTORY
+                        Directory where to output retrieved data, defaults to current directory if not provided
+  --interval INTERVAL   Time in minutes into which the logs will be split for retrieval
+  --user USER           User account to retrieve, defaults to all
+```
+
 ## Get started
 You need to grant a service account the necessary permissions:
 
